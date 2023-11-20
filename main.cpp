@@ -11,33 +11,9 @@
 
 #include "VAO.h"
 #include "VBO.h"
+#include "Shader.h"
 
 #define M_PI 3.1415926535
-
-const char* vertexShaderSource = R"glsl(
-#version 330 core
-
-in vec3 aPos;
-
-
-uniform mat4 transformMat;
-
-void main(){
-    gl_Position = transformMat * vec4(aPos, 1.0);
-}
-)glsl";
-
-const char* fragmentShaderSource = R"glsl(
-#version 330 core
-
-out vec4 color;
-
-uniform vec3 inColor;
-
-void main(){
-    color = vec4(inColor, 1.0);
-}
-)glsl";
 
 const int electronCount = 10;  
 float electrons[electronCount*6];
@@ -87,17 +63,9 @@ int main(void)
     vertBuffer.Bind();
     vertBuffer.Data(electrons, sizeof(electrons));
 
-    unsigned int vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShaderID, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShaderID);
-
-    unsigned int fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShaderID, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShaderID);
-
-    unsigned int shaderProgramID = glCreateProgram();     
-    glAttachShader(shaderProgramID, vertexShaderID);
-    glAttachShader(shaderProgramID, fragmentShaderID);
+    unsigned int shaderProgramID = glCreateProgram();
+    Shader vertShader("C:/Users/dillo/OneDrive/Documents/Projects/Particle Attraction Simulation/basic.vert", shaderProgramID, GL_VERTEX_SHADER);
+    Shader fragShader("C:/Users/dillo/OneDrive/Documents/Projects/Particle Attraction Simulation/basic.frag", shaderProgramID, GL_FRAGMENT_SHADER);
     glLinkProgram(shaderProgramID);
     glUseProgram(shaderProgramID);
 
@@ -119,7 +87,7 @@ int main(void)
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        float dt = 0.0001;
+        float dt = 0.001;
         for (int i = 0; i < electronCount*6; i += 6) {
             for (int j = 0; j < protonCount * 6; j += 6) {
                 float dist = distanceSquared(electrons[i], electrons[i + 1], electrons[i + 2], protons[j], protons[j+1], protons[j+2]);
